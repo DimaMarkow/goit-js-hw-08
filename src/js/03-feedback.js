@@ -6,39 +6,38 @@ const refs = {
   form: document.querySelector(`.feedback-form`),
 };
 
-// const STORAGE_KEY = `feedbackTextarea`;
+const STORAGE_KEY = `feedback-form-state`;
 
-refs.email.addEventListener(`input`, throttle(handleInputEmail, 1000));
-refs.textarea.addEventListener(`input`, throttle(handleInputTextarea, 1000));
+const formData = {};
+
+refs.form.addEventListener('input', throttle(handleInputForm, 500));
 refs.form.addEventListener('submit', handleSubmit);
 
-populateInputEmail();
+populateInput();
 
-function handleInputEmail(event) {
-  console.log(event.target.value);
-  localStorage.setItem(`feedbackEmail`, event.target.value);
+function handleInputForm(event) {
+  formData[event.target.name] = event.target.value;
+  const formDataString = JSON.stringify(formData);
+  localStorage.setItem(STORAGE_KEY, formDataString);
 }
 
-function handleInputTextarea(event) {
-  console.log(event.target.value);
-  localStorage.setItem(`feedbackTextarea`, event.target.value);
+function populateInput() {
+  const savedDataString = localStorage.getItem(STORAGE_KEY);
+  const savedData = JSON.parse(savedDataString);
+
+  if (savedData) {
+    refs.email.value = savedData[`email`];
+    refs.textarea.value = savedData[`message`];
+  }
 }
 
 function handleSubmit(event) {
   event.preventDefault();
-  console.log(event.currentTarget.elements);
-  event.currentTarget.reset();
-  localStorage.removeItem(`feedbackEmail`);
-  localStorage.removeItem(`feedbackTextarea`);
-}
 
-function populateInputEmail() {
-  const savedEmail = localStorage.getItem(`feedbackEmail`);
-  if (savedEmail) {
-    refs.email.value = savedEmail;
-  }
-  const savedTextarea = localStorage.getItem(`feedbackTextarea`);
-  if (savedTextarea) {
-    refs.textarea.value = savedTextarea;
-  }
+  const savedDataString = localStorage.getItem(STORAGE_KEY);
+  const savedData = JSON.parse(savedDataString);
+  console.log(savedData);
+
+  event.currentTarget.reset();
+  localStorage.removeItem(STORAGE_KEY);
 }
